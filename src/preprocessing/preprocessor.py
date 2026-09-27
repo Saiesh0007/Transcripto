@@ -29,7 +29,21 @@ def normalize_whitespace(text):
     return re.sub(r'\s+', ' ', text).strip()
 
 def remove_boilerplate(text):
-    # For a real implementation, we would look for specific headers/footers
+    """Remove common web/transcript boilerplate patterns."""
+    patterns = [
+        r'Back to Mail Online home\.?',
+        r'Back To the page you came from\.?',
+        r'Share this article.*',
+        r'Comments \(\d+\)',
+        r'Advertisement',
+        r'\{.*?\}',       # catches {vocalsound}, {disfmarker}, etc.
+        r'\[.*?\]',       # catches [music], [applause], etc.
+        r'Transcribed by.*',
+        r'This transcript.*',
+        r'END OF TRANSCRIPT'
+    ]
+    for pat in patterns:
+        text = re.sub(pat, '', text, flags=re.IGNORECASE | re.DOTALL)
     return text
 
 def preprocess_transcript(text):

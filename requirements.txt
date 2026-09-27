@@ -1,0 +1,15 @@
+pandas
+numpy
+nltk
+spacy
+scikit-learn
+transformers
+torch
+beautifulsoup4
+requests
+jupyter
+notebook
+rouge-score
+datasets
+pyarrow
+streamlit

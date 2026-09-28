@@ -223,7 +223,7 @@ def abstractive_summary(
         sections.append(_format_section("Overall Summary", final_summary))
 
     # Key Discussion Points (per topic)
-    if topics and segment_summaries:
+    if topics and segment_summaries and len(topics) > 1:
         bullet_points = "\n".join(
             f"- **{topic}**: {summary}"
             for topic, summary in zip(topics, segment_summaries)

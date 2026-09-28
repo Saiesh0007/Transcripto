@@ -66,8 +66,8 @@ def _detect_question_answer_pairs(turns: List[Dict]) -> List[Dict]:
 
 def segment_discussion(
     turns: List[Dict],
-    min_segment_turns: int = 15,
-    similarity_threshold: float = 0.05,
+    min_segment_turns: int = 8,
+    similarity_threshold: float = 0.12,
 ) -> List[Dict]:
     """
     Group turns into topical segments.

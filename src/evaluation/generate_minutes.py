@@ -5,7 +5,7 @@ Full end-to-end meeting-minutes generator.
 
 Returns a dict with:
   - extractive_summary      (TF-IDF baseline — for evaluation/comparison)
-  - abstractive_summary     (BART-synthesized — primary user-facing output)
+  - abstractive_summary     (T5-synthesized — primary user-facing output)
   - validation              (ValidationResult)
   - action_items
   - persons

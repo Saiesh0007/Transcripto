@@ -65,7 +65,7 @@ if vr.issues:
 
 print()
 print("=" * 60)
-print("GENERATE_MINUTES PIPELINE (abstractive will download BART on first run)")
+print("GENERATE_MINUTES PIPELINE (abstractive will download T5 on first run)")
 print("=" * 60)
 from src.evaluation.generate_minutes import run_pipeline
 result = run_pipeline(SAMPLE)

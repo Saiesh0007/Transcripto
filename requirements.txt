@@ -13,3 +13,5 @@ rouge-score
 datasets
 pyarrow
 streamlit
+sentencepiece
+accelerate

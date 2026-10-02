@@ -10,7 +10,7 @@ Provides both summarisation strategies:
       New production pipeline:
         1. Parse speaker turns
         2. Segment into discussion topics
-        3. Summarise each chunk with BART (facebook/bart-large-cnn)
+        3. Summarise each chunk with T5 (t5-base)
         4. Merge chunk summaries
         5. Final synthesis pass
         6. Return structured Executive Summary
@@ -32,8 +32,8 @@ logger = logging.getLogger(__name__)
 # ─── lazy model cache ────────────────────────────────────────────────────────
 _MODEL = None
 _TOKENIZER = None
-_MODEL_NAME = "sshleifer/distilbart-cnn-12-6"
-_MAX_INPUT_TOKENS = 900   # safe margin under BART's 1024 token limit
+_MODEL_NAME = "t5-base"
+_MAX_INPUT_TOKENS = 450   # safe margin under T5's 512 token limit
 _MAX_SUMMARY_TOKENS = 200
 _MIN_SUMMARY_TOKENS = 60
 
@@ -83,24 +83,28 @@ def extractive_summarize(text: str, num_sentences: int = 5) -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _summarise_chunk(model, tokenizer, text: str) -> str:
-    """Run BART on a single chunk of text using model.generate()."""
+    """Run T5 on a single chunk of text using model.generate()."""
     import torch
     text = text.strip()
     if not text or len(text.split()) < 10:
         return text   # too short to summarise meaningfully
+        
+    # T5 requires the task prefix
+    text = "summarize: " + text
+    
     word_count = len(text.split())
     # Max output is 1/3 of input length, capped at 200. No forced minimum —
-    # BART hallucinates padding when min_length exceeds actual content.
+    # T5 hallucinates padding when min_length exceeds actual content.
     max_out = min(200, max(40, word_count // 3))
     try:
         inputs = tokenizer(
             text,
             return_tensors="pt",
-            max_length=1024,
+            max_length=512,
             truncation=True,
         )
         input_len = inputs["input_ids"].shape[-1]
-        abs_max = min(input_len + max_out, 1024)
+        abs_max = min(input_len + max_out, 512)
         with torch.no_grad():
             ids = model.generate(
                 inputs["input_ids"],
@@ -113,7 +117,7 @@ def _summarise_chunk(model, tokenizer, text: str) -> str:
             )
         return tokenizer.decode(ids[0], skip_special_tokens=True).strip()
     except Exception as e:
-        logger.error(f"BART chunk error: {e}")
+        logger.error(f"T5 chunk error: {e}")
         return ""
 
 
@@ -149,7 +153,7 @@ def abstractive_summary(
     """
     Full abstractive pipeline.
     Returns a structured Executive Summary string.
-    Falls back gracefully if BART is unavailable.
+    Falls back gracefully if T5 is unavailable.
     """
     from src.summarization.transcript_parser import parse_transcript, turns_to_text
     from src.summarization.discussion_segmenter import segment_discussion, segment_to_text
@@ -158,7 +162,7 @@ def abstractive_summary(
     try:
         model, tokenizer = _get_model_and_tokenizer()
     except Exception as e:
-        logger.warning(f"Could not load BART — using enhanced extractive fallback. ({e})")
+        logger.warning(f"Could not load T5 — using enhanced extractive fallback. ({e})")
         return _enhanced_extractive_fallback(raw_transcript, extractive_fallback_sentences)
 
     # ── Step 0: clean transcript before any parsing ──────────────────────────

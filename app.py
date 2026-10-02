@@ -3,7 +3,7 @@ app.py  — AI Meeting Minutes Generator (Streamlit frontend)
 
 Features:
   - Select any of the 100 dataset meetings OR paste a custom transcript
-  - Shows both Abstractive (BART) and Extractive (TF-IDF) Executive Summaries
+  - Shows both Abstractive (T5) and Extractive (TF-IDF) Executive Summaries
   - Displays Evaluation metrics panel (ROUGE scores from file)
   - Shows validation quality score per generation
   - Sidebar: full ROUGE evaluation results + methodology info
@@ -94,7 +94,7 @@ with st.sidebar:
     | Version | Method |
     |---------|--------|
     | **Baseline** | TF-IDF extractive (top 5 sentences) |
-    | **Production** | BART abstractive (hierarchical chunks) |
+    | **Production** | T5 abstractive (hierarchical chunks) |
     """)
     st.markdown("---")
     st.markdown("### Dataset")
@@ -112,7 +112,7 @@ with st.sidebar:
 st.title("📝 AI Meeting Minutes Generator")
 st.markdown(
     "An end-to-end NLP pipeline: **Raw Transcript → Speaker Parsing → "
-    "Topic Segmentation → BART Summarisation → Extraction → Structured Minutes**"
+    "Topic Segmentation → T5 Summarisation → Extraction → Structured Minutes**"
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -162,7 +162,7 @@ def render_results(result: dict, transcript: str):
     st.markdown("---")
 
     # Primary: Abstractive
-    st.markdown("### 🤖 Executive Summary (BART Abstractive — Production)")
+    st.markdown("### 🤖 Executive Summary (T5 Abstractive — Production)")
     abs_text = result["abstractive_summary"] or "Not generated."
     st.markdown(f'<div class="section-card">{abs_text}</div>', unsafe_allow_html=True)
 
@@ -210,7 +210,7 @@ def render_results(result: dict, transcript: str):
 
 def run_and_render(transcript: str):
     from src.evaluation.generate_minutes import run_pipeline
-    with st.spinner("🔄 Running NLP pipeline (parsing → segmenting → BART → extracting → validating)..."):
+    with st.spinner("🔄 Running NLP pipeline (parsing → segmenting → T5 → extracting → validating)..."):
         result = run_pipeline(transcript)
     st.success("✅ Minutes generated!")
     render_results(result, transcript)
@@ -289,7 +289,7 @@ with tab_compare:
                 st.markdown("### 🔵 Extractive Baseline (TF-IDF)")
                 st.info(ext or "No output.")
             with col_abs:
-                st.markdown("### 🟢 Abstractive Summary (BART)")
+                st.markdown("### 🟢 Abstractive Summary (T5)")
                 st.success(abs_ or "No output.")
 
             st.metric("Abstractive Quality Score", f"{val.score:.2f} / 1.00")
